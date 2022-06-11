@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
   enum state st = S_WAIT; // the initial state
 
   while (st != S_END) {
-    if (read(0, p, sizeof(char) != sizeof(char))) {
+    if (read(0, p, sizeof(char)) != sizeof(char)) {
       st = S_END;
     } else {
       st = transform_state(st, get_char_type(*p));
@@ -129,6 +129,5 @@ int main(int argc, char *argv[]) {
 
     ++p;
   }
-
   exit(0);
 }
