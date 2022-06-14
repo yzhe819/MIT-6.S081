@@ -291,6 +291,8 @@ fork(void)
 
   safestrcpy(np->name, p->name, sizeof(p->name));
 
+  np->mask = p->mask; // copy the process's signal mask
+
   pid = np->pid;
 
   np->state = RUNNABLE;
