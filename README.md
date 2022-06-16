@@ -8,19 +8,7 @@
 
 - [x] Lab1: Xv6 and Unix utilities
 
-  笔记：[Mit 6.S081 Lab 1 Xv6 和 Unix 实用程序](http://yzhe819.wiki/posts/mit-6.s081-lab-1/)
-
-  分支：[util 源码](https://github.com/yzhe819/MIT-6.S081/tree/util)
-  
-  课程文档：[Xv6 and Unix utilities](https://pdos.csail.mit.edu/6.S081/2020/labs/util.html)
-
 - [x] Lab2: System calls
-
-  笔记：[Mit 6.S081 Lab 2 系统调用](http://yzhe819.wiki/posts/mit-6.s081.lab-2/)
-
-  分支：[syscall 源码](https://github.com/yzhe819/MIT-6.S081/tree/syscall)
-  
-  课程文档：[System calls](https://pdos.csail.mit.edu/6.828/2020/labs/syscall.html)
 
 - [ ] Lab3: Page tables
 
@@ -39,6 +27,15 @@
 - [ ] Lab10: Mmap
 
 - [ ] Lab11: Network
+
+
+
+### 实验表格：
+
+| 实验  | 笔记                                                         | 源码                                                         | 课程文档                                                     |
+| ----- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Lab 1 | [Mit 6.S081 Lab 1 Xv6 和 Unix 实用程序](http://yzhe819.wiki/posts/mit-6.s081-lab-1/) | [util 分支](https://github.com/yzhe819/MIT-6.S081/tree/util) | [Xv6 and Unix utilities](https://pdos.csail.mit.edu/6.S081/2020/labs/util.html) |
+| Lab 2 | [Mit 6.S081 Lab 2 系统调用](http://yzhe819.wiki/posts/mit-6.s081.lab-2/) | [syscall 分支](https://github.com/yzhe819/MIT-6.S081/tree/syscall) | [System calls](https://pdos.csail.mit.edu/6.828/2020/labs/syscall.html) |
 
 
 
