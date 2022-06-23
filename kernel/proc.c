@@ -38,7 +38,7 @@ procinit(void)
       if(pa == 0)
         panic("kalloc");
       uint64 va = KSTACK((int) (p - proc));
-      kvmmap(va, (uint64)pa, PGSIZE, PTE_R | PTE_W);
+      uvmmap(va, (uint64)pa, PGSIZE, PTE_R | PTE_W);
       p->kstack = va;
   }
   kvminithart();
@@ -121,6 +121,15 @@ found:
     return 0;
   }
 
+  // Add the kernal page table
+  // An empty user page table.
+  p->kernelpt = proc_kernelpt(p);
+  if(p->kernelpt == 0){
+    freeproc(p);
+    release(&p->lock);
+    return 0;
+  }
+
   // Set up new context to start executing at forkret,
   // which returns to user space.
   memset(&p->context, 0, sizeof(p->context));
@@ -183,6 +192,31 @@ proc_pagetable(struct proc *p)
   }
 
   return pagetable;
+}
+
+// Create a kernel page table for a given process
+pagetable_t
+proc_kernelpt(){
+  pagetable_t kernel_pagetable;
+  kernel_pagetable = uvmcreate;
+  if (kernel_pagetable == 0) return 0;
+  uvmmap(kernel_pagetable, UART0, UART0, PGSIZE, PTE_R | PTE_W);
+  uvmmap(kernel_pagetable, VIRTIO0, VIRTIO0, PGSIZE, PTE_R | PTE_W);
+  uvmmap(kernel_pagetable, CLINT, CLINT, 0x10000, PTE_R | PTE_W);
+  uvmmap(kernel_pagetable, PLIC, PLIC, 0x400000, PTE_R | PTE_W);
+  uvmmap(kernel_pagetable, KERNBASE, KERNBASE, (uint64)etext-KERNBASE, PTE_R | PTE_X);
+  uvmmap(kernel_pagetable, (uint64)etext, (uint64)etext, PHYSTOP-(uint64)etext, PTE_R | PTE_W);
+  uvmmap(kernel_pagetable, TRAMPOLINE, (uint64)trampoline, PGSIZE, PTE_R | PTE_X);
+  return kernel_pagetable;
+}
+
+// Just follow the kvmmap on vm.c
+// mapping to the kernel page table
+void
+kvmmap(pagetable_t pagetable, uint64 va, uint64 pa, uint64 sz, int perm)
+{
+  if(mappages(pagetable, va, sz, pa, perm) != 0)
+    panic("kvmmap");
 }
 
 // Free a process's page table, and free the
