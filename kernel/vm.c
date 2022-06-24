@@ -450,3 +450,18 @@ vmprint(pagetable_t pagetable){
   printf("page table %p\n", pagetable);
   _vmprint(pagetable, 0);
 }
+
+void
+u2kvmcopy(pagetable_t pagetable, pagetable_t kernelpt, uint64 oldsz, uint64 newsz){
+  pte_t *pte_from, *pte_to;
+  oldsz = PGROUNDUP(oldsz);
+  for (uint64 i = oldsz; i < newsz; i++){
+    if((pte_from = walk(pagetable, i, 0)) == 0)
+      panic("u2kvmcopy: pte should exist");
+    if((pte_to = walk(kernelpt, i, 1)) == 0)
+      panic("u2kvmcopy: walk fails");
+    uint64 pa = PTE2PA(*pte_from);
+    uint flags = (PTE_FLAGS(*pte_from)) & (~PTE_U);
+    *pte_to = PA2PTE(pa) | flags;
+  }
+}
