@@ -8,9 +8,9 @@
 
 | 实验  | 笔记                                                         | 源码                                                         | 课程文档                                                     |
 | ----- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| Lab 1 | [Mit 6.S081 Lab 1 Xv6 和 Unix 实用程序](http://yzhe819.wiki/posts/mit-6.s081-lab-1/) | [util 分支](https://github.com/yzhe819/MIT-6.S081/tree/util) | [Xv6 and Unix utilities](https://pdos.csail.mit.edu/6.S081/2020/labs/util.html) |
-| Lab 2 | [Mit 6.S081 Lab 2 系统调用](http://yzhe819.wiki/posts/mit-6.s081.lab-2/) | [syscall 分支](https://github.com/yzhe819/MIT-6.S081/tree/syscall) | [System calls](https://pdos.csail.mit.edu/6.828/2020/labs/syscall.html) |
-| Lab 3 | Coming soon                                                  | [pgtbl 分支](https://github.com/yzhe819/MIT-6.S081/commits/pgtbl) | [Page tables](https://pdos.csail.mit.edu/6.828/2020/labs/pgtbl.html) |
+| Lab 1 | [MIT 6.S081 Lab 1 Xv6 和 Unix 实用程序](http://yzhe819.wiki/posts/mit-6.s081-lab-1/) | [util 分支](https://github.com/yzhe819/MIT-6.S081/tree/util) | [Xv6 and Unix utilities](https://pdos.csail.mit.edu/6.S081/2020/labs/util.html) |
+| Lab 2 | [MIT 6.S081 Lab 2 系统调用](http://yzhe819.wiki/posts/mit-6.s081.lab-2/) | [syscall 分支](https://github.com/yzhe819/MIT-6.S081/tree/syscall) | [System calls](https://pdos.csail.mit.edu/6.828/2020/labs/syscall.html) |
+| Lab 3 | [MIT 6.S081 Lab 3 页表](http://yzhe819.wiki/posts/mit-6.s081.lab-3/) | [pgtbl 分支](https://github.com/yzhe819/MIT-6.S081/commits/pgtbl) | [Page tables](https://pdos.csail.mit.edu/6.828/2020/labs/pgtbl.html) |
 
 
 
