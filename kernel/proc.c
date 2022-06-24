@@ -148,18 +148,13 @@ freeproc(struct proc *p)
   if(p->trapframe)
     kfree((void*)p->trapframe);
   p->trapframe = 0;
-  // free the kernel stack in the RAM
-  if(p->kstack) {
-    pte_t *kstack_pte = walk(p->kernelpt, p->kstack, 0);
-    if(kstack_pte == 0)
-      panic("freeproc: kstack");
-    kfree((void *)PTE2PA(*kstack_pte));
-  }
-  p->kstack = 0;
   // free the process page table
   if(p->pagetable)
     proc_freepagetable(p->pagetable, p->sz);
   p->pagetable = 0;
+  // free the kernel stack in the RAM
+  uvmunmap(p->kernelpt, p->kstack, 1, 1);
+  p->kstack = 0;
   // free the kernel page table of process
   if(p->kernelpt)
     proc_freekernelpt(p->kernelpt);
