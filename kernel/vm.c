@@ -6,6 +6,11 @@
 #include "defs.h"
 #include "fs.h"
 
+// This one is for proc.h. Without it,
+// it would result in the wrong lock type
+#include "spinlock.h" 
+#include "proc.h"
+
 /*
  * the kernel's page table.
  */
@@ -50,8 +55,7 @@ kvminit()
 // Create a kernel page table for a given process
 pagetable_t
 proc_kernelpt(){
-  pagetable_t kernel_pagetable;
-  kernel_pagetable = uvmcreate();
+  pagetable_t kernel_pagetable = uvmcreate();
   if (kernel_pagetable == 0) return 0;
   uvmmap(kernel_pagetable, UART0, UART0, PGSIZE, PTE_R | PTE_W);
   uvmmap(kernel_pagetable, VIRTIO0, VIRTIO0, PGSIZE, PTE_R | PTE_W);
@@ -158,7 +162,7 @@ kvmpa(uint64 va)
   pte_t *pte;
   uint64 pa;
   
-  pte = walk(kernel_pagetable, va, 0);
+  pte = walk(myproc()->kernelpt, va, 0);
   if(pte == 0)
     panic("kvmpa");
   if((*pte & PTE_V) == 0)
