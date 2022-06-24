@@ -448,7 +448,7 @@ _vmprint(pagetable_t pagetable, int level){
 void
 vmprint(pagetable_t pagetable){
   printf("page table %p\n", pagetable);
-  _vmprint(pagetable, 0);
+  _vmprint(pagetable, 1);
 }
 
 void
