@@ -38,7 +38,7 @@ procinit(void)
       if(pa == 0)
         panic("kalloc");
       uint64 va = KSTACK((int) (p - proc));
-      uvmmap(va, (uint64)pa, PGSIZE, PTE_R | PTE_W);
+      kvmmap(va, (uint64)pa, PGSIZE, PTE_R | PTE_W);
       p->kstack = va;
   }
   kvminithart();
@@ -122,7 +122,6 @@ found:
   }
 
   // Add the kernal page table
-  // An empty user page table.
   p->kernelpt = proc_kernelpt(p);
   if(p->kernelpt == 0){
     freeproc(p);
