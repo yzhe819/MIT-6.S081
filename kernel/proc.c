@@ -113,7 +113,7 @@ found:
   }
 
   // Add the kernal page table
-  p->kernelpt = proc_kernelpt();
+  p->kernelpt = proc_kpt_init();
   if(p->kernelpt == 0){
     freeproc(p);
     release(&p->lock);
@@ -151,7 +151,8 @@ freeproc(struct proc *p)
   // free the kernel stack in the RAM
   if(p->kstack) {
     pte_t *kstack_pte = walk(p->kernelpt, p->kstack, 0);
-    if(kstack_pte == 0) panic("freeproc");
+    if(kstack_pte == 0)
+      panic("freeproc: kstack");
     kfree((void *)PTE2PA(*kstack_pte));
   }
   p->kstack = 0;
@@ -527,8 +528,7 @@ scheduler(void)
         c->proc = p;
 
         // Store the kernal page table into the SATP
-        w_satp(MAKE_SATP(p->kernelpt));
-        sfence_vma();
+        proc_inithart(p->kernelpt);
 
         swtch(&c->context, &p->context);
 

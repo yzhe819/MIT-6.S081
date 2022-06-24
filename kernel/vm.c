@@ -54,17 +54,17 @@ kvminit()
 
 // Create a kernel page table for a given process
 pagetable_t
-proc_kernelpt(){
-  pagetable_t kernel_pagetable = uvmcreate();
-  if (kernel_pagetable == 0) return 0;
-  uvmmap(kernel_pagetable, UART0, UART0, PGSIZE, PTE_R | PTE_W);
-  uvmmap(kernel_pagetable, VIRTIO0, VIRTIO0, PGSIZE, PTE_R | PTE_W);
-  uvmmap(kernel_pagetable, CLINT, CLINT, 0x10000, PTE_R | PTE_W);
-  uvmmap(kernel_pagetable, PLIC, PLIC, 0x400000, PTE_R | PTE_W);
-  uvmmap(kernel_pagetable, KERNBASE, KERNBASE, (uint64)etext-KERNBASE, PTE_R | PTE_X);
-  uvmmap(kernel_pagetable, (uint64)etext, (uint64)etext, PHYSTOP-(uint64)etext, PTE_R | PTE_W);
-  uvmmap(kernel_pagetable, TRAMPOLINE, (uint64)trampoline, PGSIZE, PTE_R | PTE_X);
-  return kernel_pagetable;
+proc_kpt_init(){
+  pagetable_t kernelpt = uvmcreate();
+  if (kernelpt == 0) return 0;
+  uvmmap(kernelpt, UART0, UART0, PGSIZE, PTE_R | PTE_W);
+  uvmmap(kernelpt, VIRTIO0, VIRTIO0, PGSIZE, PTE_R | PTE_W);
+  uvmmap(kernelpt, CLINT, CLINT, 0x10000, PTE_R | PTE_W);
+  uvmmap(kernelpt, PLIC, PLIC, 0x400000, PTE_R | PTE_W);
+  uvmmap(kernelpt, KERNBASE, KERNBASE, (uint64)etext-KERNBASE, PTE_R | PTE_X);
+  uvmmap(kernelpt, (uint64)etext, (uint64)etext, PHYSTOP-(uint64)etext, PTE_R | PTE_W);
+  uvmmap(kernelpt, TRAMPOLINE, (uint64)trampoline, PGSIZE, PTE_R | PTE_X);
+  return kernelpt;
 }
 
 
@@ -74,6 +74,13 @@ void
 kvminithart()
 {
   w_satp(MAKE_SATP(kernel_pagetable));
+  sfence_vma();
+}
+
+// Store kernel page table to SATP register
+void
+proc_inithart(pagetable_t kpt){
+  w_satp(MAKE_SATP(kpt));
   sfence_vma();
 }
 
@@ -365,6 +372,21 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
   return -1;
 }
 
+void
+u2kvmcopy(pagetable_t pagetable, pagetable_t kernelpt, uint64 oldsz, uint64 newsz){
+  pte_t *pte_from, *pte_to;
+  oldsz = PGROUNDUP(oldsz);
+  for (uint64 i = oldsz; i < newsz; i += PGSIZE){
+    if((pte_from = walk(pagetable, i, 0)) == 0)
+      panic("u2kvmcopy: src pte does not exist");
+    if((pte_to = walk(kernelpt, i, 1)) == 0)
+      panic("u2kvmcopy: pte walk failed");
+    uint64 pa = PTE2PA(*pte_from);
+    uint flags = (PTE_FLAGS(*pte_from)) & (~PTE_U);
+    *pte_to = PA2PTE(pa) | flags;
+  }
+}
+
 // mark a PTE invalid for user access.
 // used by exec for the user stack guard page.
 void
@@ -449,19 +471,4 @@ void
 vmprint(pagetable_t pagetable){
   printf("page table %p\n", pagetable);
   _vmprint(pagetable, 1);
-}
-
-void
-u2kvmcopy(pagetable_t pagetable, pagetable_t kernelpt, uint64 oldsz, uint64 newsz){
-  pte_t *pte_from, *pte_to;
-  oldsz = PGROUNDUP(oldsz);
-  for (uint64 i = oldsz; i < newsz; i += PGSIZE){
-    if((pte_from = walk(pagetable, i, 0)) == 0)
-      panic("u2kvmcopy: src pte does not exist");
-    if((pte_to = walk(kernelpt, i, 1)) == 0)
-      panic("u2kvmcopy: pte walk failed");
-    uint64 pa = PTE2PA(*pte_from);
-    uint flags = (PTE_FLAGS(*pte_from)) & (~PTE_U);
-    *pte_to = PA2PTE(pa) | flags;
-  }
 }
