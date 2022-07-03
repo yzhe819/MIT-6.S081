@@ -1,0 +1,17 @@
+RISC-V assembly (easy)
+1. In main function, it used a2 register to store the 13.
+Also, it used a0, a1, a2 to record the argument.
+Usually, a0 - a1 are used for function arguments or return values.
+Then, a2 - a7 are only used for function arguments.
+
+2. I cannot find the function invoke in the main function, which means the compiler did some optimization for the assembly code. It directly use number 12 to replace the invoking.
+This similar thing happened on the g function, just add 3 rather than call f function.
+
+3. 0000000000000630. This can be found from: line 1092 0000000000000630 <printf>:.
+
+4. After the auipc ra, 0x0, the data in ra should be its address, which is 0X30. Then, jalr	1536(ra) will change it to 630, which is the address of printf function. After jump to the printf function, the above jalr code will also store the current PC plus four to ra (0X34 + 4 => 0X38). So, the value of ra is 0X38.
+
+5. HE110 World. Because the 57616 is equal to 0XE110 (hex number), so the first half will display HE110. For the second half, due to Little-Endian, it will be stored as 72-6c-64-00. The 72 is r, 6c is l, 64 is d, and 00 is the string ending.
+
+6. Because it only get one argument, but required two. So, the latter one will use a2's value to display. The final display content will depend on the what value store in a1.
+The format string store in a0, the arguments will start from a1.
