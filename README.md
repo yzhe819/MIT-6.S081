@@ -15,5 +15,6 @@
 
 
 ### 参考材料
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=huihongxiao&repo=MIT6.S081)](https://github.com/huihongxiao/MIT6.S081)
 
 [![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=duguosheng&repo=6.S081-All-in-one)](https://github.com/duguosheng/6.S081-All-in-one)
