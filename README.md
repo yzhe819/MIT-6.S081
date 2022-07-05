@@ -12,6 +12,7 @@
 | Lab 2 | [MIT 6.S081 Lab 2 系统调用](http://yzhe819.wiki/posts/mit-6.s081.lab-2/) | [syscall 分支](https://github.com/yzhe819/MIT-6.S081/tree/syscall) | [System calls](https://pdos.csail.mit.edu/6.828/2020/labs/syscall.html) |
 | Lab 3 | [MIT 6.S081 Lab 3 页表](http://yzhe819.wiki/posts/mit-6.s081.lab-3/) | [pgtbl 分支](https://github.com/yzhe819/MIT-6.S081/commits/pgtbl) | [Page tables](https://pdos.csail.mit.edu/6.828/2020/labs/pgtbl.html) |
 | Lab 4 | Coming soon                                                  | [traps 分支](https://github.com/yzhe819/MIT-6.S081/tree/traps) | [Traps](https://pdos.csail.mit.edu/6.828/2020/labs/traps.html) |
+| Lab 5 | Coming soon                                                  | [lazy 分支](https://github.com/yzhe819/MIT-6.S081/tree/lazy) | [Xv6 lazy page allocation](https://pdos.csail.mit.edu/6.828/2020/labs/lazy.html) |
 
 
 
