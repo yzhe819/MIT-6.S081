@@ -114,6 +114,13 @@ found:
     return 0;
   }
 
+  if((p->alarm_trapframe = (struct trapframe*)kalloc()) == 0) {
+    freeproc(p);
+    release(&p->lock);
+    return 0;
+}
+
+  p->is_alarming = 0;
   p->alarm_interval = 0;
   p->alarm_handler = 0;
   p->tick_count = 0;
@@ -155,6 +162,10 @@ freeproc(struct proc *p)
   p->killed = 0;
   p->xstate = 0;
   p->state = UNUSED;
+  if(p->alarm_trapframe)
+    kfree((void*)p->alarm_trapframe);
+  p->alarm_trapframe = 0;
+  p->is_alarming = 0;
   p->alarm_interval = 0;
   p->alarm_handler = 0;
   p->tick_count = 0;
@@ -717,5 +728,8 @@ sys_sigalarm(void){
 
 uint64
 sys_sigreturn(void){
+  struct proc *p = myproc();
+  memmove(p->trapframe, p->alarm_trapframe, sizeof(struct trapframe));
+  p->is_alarming = 0;
   return 0;
 }
