@@ -109,9 +109,14 @@ found:
 
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
+    freeproc(p);
     release(&p->lock);
     return 0;
   }
+
+  p->alarm_interval = 0;
+  p->alarm_handler = 0;
+  p->tick_count = 0;
 
   // An empty user page table.
   p->pagetable = proc_pagetable(p);
@@ -150,6 +155,9 @@ freeproc(struct proc *p)
   p->killed = 0;
   p->xstate = 0;
   p->state = UNUSED;
+  p->alarm_interval = 0;
+  p->alarm_handler = 0;
+  p->tick_count = 0;
 }
 
 // Create a user page table for a given process,
@@ -696,4 +704,18 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+uint64
+sys_sigalarm(void){
+  struct proc *p = myproc();
+  if(argint(0, &p->alarm_interval) < 0 ||
+    argaddr(1, (uint64*)&p->alarm_handler) < 0)
+    return -1;
+  return 0;
+}
+
+uint64
+sys_sigreturn(void){
+  return 0;
 }
