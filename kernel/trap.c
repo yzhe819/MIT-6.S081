@@ -72,22 +72,28 @@ usertrap(void)
   } else if (cause == 13 || cause == 15){
     // only for page fault and trap
     uint64 va = r_stval();
-    uint64 ka = (uint64)kalloc();
 
-    if(ka == 0){
-      // check the memory can be allocated 
-      panic("usertrap: no memory");
-      p->killed = 1;
-    } else {
-      memset((void*)ka, 0, PGSIZE);
-      va = PGROUNDDOWN(va);
-      if(mappages(p->pagetable, va, PGSIZE, ka, PTE_U | PTE_W| PTE_R) != 0){
-        panic("usertrap: mappage failed");
-        kfree((void*)ka);
+    if(PGROUNDDOWN(p->trapframe->sp) < va && va < p->sz){
+      uint64 ka = (uint64)kalloc();
+
+      if(ka == 0){
+        // check the memory can be allocated 
+        // panic("usertrap: no memory");
         p->killed = 1;
+      } else {
+        memset((void*)ka, 0, PGSIZE);
+        va = PGROUNDDOWN(va);
+        if(mappages(p->pagetable, va, PGSIZE, ka, PTE_U | PTE_W| PTE_R) != 0){
+          panic("usertrap: mappage failed");
+          kfree((void*)ka);
+          p->killed = 1;
+        }
       }
+    }else{
+      // panic("usertrap: invalid address");
+      p->killed = 1;
     }
-
+    
   } else {
     printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
     printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
