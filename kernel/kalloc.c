@@ -129,20 +129,35 @@ cowalloc(pagetable_t pagetable, uint64 va) {
   if(pa == 0) return 0;
 
   pte_t* pte = walk(pagetable, va, 0);
-  uint flags = PTE_FLAGS(*pte);
 
-  char *ka = kalloc();
-  if (ka == 0) return 0;
-  // copy the page to the new page
-  memmove(ka, (char*)pa, PGSIZE);
-  // remove the old memory usage
-  // this will decrease the reference count of address
-  kfree((void*)pa);
-  // set the new mapping in the page table
-  flags = (flags & ~PTE_COW) | PTE_W;
-  *pte = PA2PTE((uint64)ka) | flags;
+  if(krefcnt((char*)pa) == 1) {
+    *pte |= PTE_W;
+    *pte &= ~PTE_COW;
+    return (void*)pa;
+  } else {
+    char *ka = kalloc();
+    if(ka == 0) return 0;
+    
+    // copy the page to the new page
+    memmove(ka, (char*)pa, PGSIZE);
+    // clear the old page
+    *pte &= ~PTE_V;
 
-  return (void*)ka;
+    // set the new mapping in the page table
+    uint flags = PTE_FLAGS(*pte);
+    flags = (flags | PTE_W) & ~PTE_COW;
+
+    if(mappages(pagetable, va, PGSIZE, (uint64)ka, flags) != 0) {
+      kfree(ka);
+      *pte |= PTE_V;
+      return 0;
+    }
+
+    // remove the old memory usage
+    // this will decrease the reference count of address
+    kfree((char*)PGROUNDDOWN(pa));
+    return (void*)ka;
+  }
 }
 
 // get the current ref count of the given address
