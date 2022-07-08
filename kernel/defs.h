@@ -66,7 +66,7 @@ void            kinit(void);
 int             krefcnt(void*);
 int             kaddrefcnt(void*);
 int             cowpage(pagetable_t, uint64);
-int             cowalloc(pagetable_t, uint64);
+void*           cowalloc(pagetable_t, uint64);
 
 // log.c
 void            initlog(int, struct superblock*);

@@ -106,49 +106,43 @@ kalloc(void)
 // return 1 if it is, 0 otherwise
 int
 cowpage(pagetable_t pagetable, uint64 va) {
-  if(va >= MAXVA){
-    // invalid virtual address
-    return 0;
-  }
+  // invalid virtual address
+  if(va >= MAXVA) return 0;
   // get the page table entry
   pte_t* pte = walk(pagetable, va, 0);
-  uint flags = PTE_FLAGS(*pte);
-  
-  if(pte == 0 || (flags & PTE_V) == 0){
-    // invalid page table entry
+  // invalid page table entry
+  if(pte == 0 || (*pte & PTE_V) == 0)
     return 0;
-  }else{
-    // check the COW bit
-    return (flags & PTE_COW);
-  }
+  return (*pte & PTE_COW); // check the COW bit
 }
 
 // alloc a page table for a new writing operation
 // assume the page table is valid and only using for COW case
-// return 0 for failure, 1 for success
-int
+// return 0 for failure, otherwise for success
+void*
 cowalloc(pagetable_t pagetable, uint64 va) {
   va = PGROUNDDOWN(va);
+
+  if(va % PGSIZE != 0) return 0;
+
+  uint64 pa = walkaddr(pagetable, va);
+  if(pa == 0) return 0;
+
   pte_t* pte = walk(pagetable, va, 0);
   uint flags = PTE_FLAGS(*pte);
-  uint64 pa = PTE2PA(*pte);
-  if (pa == 0) return 0;
 
-  // check the COW bit
-  if(flags & PTE_COW){
-    char *ka = kalloc();
-    if (ka == 0) return 0;
-    // copy the page to the new page
-    memmove(ka, (char*)pa, PGSIZE);
-    // remove the old memory usage
-    // this will decrease the reference count of address
-    kfree((void*)pa);
-    // set the new mapping in the page table
-    flags = (flags & ~PTE_COW) | PTE_W;
-    *pte = PA2PTE((uint64)ka) | flags;
-  }
+  char *ka = kalloc();
+  if (ka == 0) return 0;
+  // copy the page to the new page
+  memmove(ka, (char*)pa, PGSIZE);
+  // remove the old memory usage
+  // this will decrease the reference count of address
+  kfree((void*)pa);
+  // set the new mapping in the page table
+  flags = (flags & ~PTE_COW) | PTE_W;
+  *pte = PA2PTE((uint64)ka) | flags;
 
-  return 1;
+  return (void*)ka;
 }
 
 // get the current ref count of the given address

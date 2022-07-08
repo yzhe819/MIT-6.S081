@@ -75,7 +75,6 @@ usertrap(void)
     if(va >= p->sz || (va <= PGROUNDDOWN(p->trapframe->sp) && va >= PGROUNDDOWN(p->trapframe->sp) - PGSIZE)){
       p->killed = 1;
     }else if(cowpage(p->pagetable, va) && !cowalloc(p->pagetable, va)){
-      // failed to alloc a new page for COW.
       p->killed = 1;
     }
   } else {
