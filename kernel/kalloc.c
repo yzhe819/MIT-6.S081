@@ -104,7 +104,7 @@ kalloc(void)
 // check whether the given page table is using for COW case
 // return 1 if it is, 0 otherwise
 int
-cowpage(pagetable_t pagetable, uint64 va){
+cowpage(pagetable_t pagetable, uint64 va) {
   if(va >= MAXVA){
     // invalid virtual address
     return 0;
@@ -125,7 +125,7 @@ cowpage(pagetable_t pagetable, uint64 va){
 // alloc a page table for a new writing operation
 // assume the page table is valid and only using for COW case
 int
-cowalloc(pagetable_t pagetable, uint64 va){
+cowalloc(pagetable_t pagetable, uint64 va) {
   va = PGROUNDDOWN(va);
   pte_t* pte = walk(pagetable, va, 0);
   uint flags = PTE_FLAGS(*pte);
