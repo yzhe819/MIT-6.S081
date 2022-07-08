@@ -72,7 +72,7 @@ usertrap(void)
   } else if(cause == 13 || cause == 15) {
     uint64 va = r_stval();
     // check if the address is valid.
-    if(va >= p->sz){
+    if(va >= p->sz || (va <= PGROUNDDOWN(p->trapframe->sp) && va >= PGROUNDDOWN(p->trapframe->sp) - PGSIZE)){
       p->killed = 1;
     }else if(cowpage(p->pagetable, va) && !cowalloc(p->pagetable, va)){
       // failed to alloc a new page for COW.

@@ -61,20 +61,21 @@ kfree(void *pa)
     panic("kfree");
   
   acquire(&ref.lock);
-  if(--ref.cnt[(uint64)pa / PGSIZE] == 0){
+  if(--ref.cnt[(uint64)pa / PGSIZE] != 0){
     release(&ref.lock);
-    // Fill with junk to catch dangling refs.
-    memset(pa, 1, PGSIZE);
-
-    r = (struct run*)pa;
-
-    acquire(&kmem.lock);
-    r->next = kmem.freelist;
-    kmem.freelist = r;
-    release(&kmem.lock);
-  }else{
-    release(&ref.lock);
+    return;
   }
+
+  release(&ref.lock);
+  // Fill with junk to catch dangling refs.
+  memset(pa, 1, PGSIZE);
+
+  r = (struct run*)pa;
+
+  acquire(&kmem.lock);
+  r->next = kmem.freelist;
+  kmem.freelist = r;
+  release(&kmem.lock);
 }
 
 // Allocate one 4096-byte page of physical memory.
@@ -124,6 +125,7 @@ cowpage(pagetable_t pagetable, uint64 va) {
 
 // alloc a page table for a new writing operation
 // assume the page table is valid and only using for COW case
+// return 0 for failure, 1 for success
 int
 cowalloc(pagetable_t pagetable, uint64 va) {
   va = PGROUNDDOWN(va);
@@ -134,25 +136,16 @@ cowalloc(pagetable_t pagetable, uint64 va) {
 
   // check the COW bit
   if(flags & PTE_COW){
-    char *mem;
-    if((mem = kalloc()) == 0) return 0;
+    char *ka = kalloc();
+    if (ka == 0) return 0;
     // copy the page to the new page
-    memmove(mem, (char*)pa, PGSIZE);
-    // remove cow bit and set the write bit back
-    flags = (flags & ~PTE_COW) | PTE_W;
-    // remove the PTE_V bit for the remap issue
-    *pte &= ~PTE_V;
-
-    // set the new mapping in the page table
-    if(mappages(pagetable, va, PGSIZE, (uint64)mem, flags) != 0) {
-      kfree(mem);
-      *pte |= PTE_V;
-      return 0;
-    }
-
+    memmove(ka, (char*)pa, PGSIZE);
     // remove the old memory usage
     // this will decrease the reference count of address
     kfree((void*)pa);
+    // set the new mapping in the page table
+    flags = (flags & ~PTE_COW) | PTE_W;
+    *pte = PA2PTE((uint64)ka) | flags;
   }
 
   return 1;

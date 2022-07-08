@@ -327,17 +327,14 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
     }
 
     if(mappages(new, i, PGSIZE, pa, flags) != 0){
-      goto err;
+      uvmunmap(new, 0, i / PGSIZE, 1);
+      return -1;
     }
 
     // increase the ref number
     kaddrefcnt((char*)pa);
   }
   return 0;
-
- err:
-  uvmunmap(new, 0, i / PGSIZE, 1);
-  return -1;
 }
 
 // mark a PTE invalid for user access.
